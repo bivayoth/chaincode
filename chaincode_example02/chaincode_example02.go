@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"math/rand"
 
 	"github.com/openblockchain/obc-peer/openchain/chaincode/shim"
 )
@@ -189,9 +188,9 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args 
     if function == "query" {
         return t.query(stub, args)
     }
-	else {
-		return nil, errors.New("Invalid query function name. Expecting \"query\"")
-	}
+    
+	return nil, errors.New("Invalid query function name. Expecting \"query\"")
+
 }
 
 func main() {
