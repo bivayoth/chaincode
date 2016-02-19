@@ -177,7 +177,7 @@ func (t *SimpleChaincode) Run(stub *shim.ChaincodeStub, function string, args []
 		// Deletes an entity from its state
 		return t.delete(stub, args)
 	} else if function == "query" {
-        // Reads the state of an entity (SHOULD BE IN QUERY, HACKING SDK)
+        // Reads the state of an entity (HACK: SHOULD BE IN QUERY)
         return t.query(stub, args)
     }
 
