@@ -139,6 +139,29 @@ func (t *SimpleChaincode) delete(stub *shim.ChaincodeStub, args []string) ([]byt
 	return nil, nil
 }
 
+// Query an entity from state
+func (t *SimpleChaincode) query(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+	var A string // Entities
+    var err error
+
+    if len(args) != 1 {
+        return nil, errors.New("Incorrect number of arguments. Expecting name of the person to query")
+    }
+
+    A = args[0]
+
+    // Get the state from the ledger
+    Avalbytes, err := stub.GetState(A)
+    if err != nil {
+        jsonResp := "{\"Error\":\"Failed to get state for " + A + "\"}"
+        return nil, errors.New(jsonResp)
+    }
+
+    jsonResp := "{\"Name\":\"" + A + "\",\"Amount\":\"" + string(Avalbytes) + "\"}"
+    fmt.Printf("Query Response:%s\n", jsonResp)
+    return Avalbytes, nil
+}
+
 // Run callback representing the invocation of a chaincode
 // This chaincode will manage two accounts A and B and will transfer X units from A to B upon invoke
 func (t *SimpleChaincode) Run(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
@@ -153,7 +176,10 @@ func (t *SimpleChaincode) Run(stub *shim.ChaincodeStub, function string, args []
 	} else if function == "delete" {
 		// Deletes an entity from its state
 		return t.delete(stub, args)
-	}
+	} else if function == "query" {
+        // Reads the state of an entity (SHOULD BE IN QUERY, HACKING SDK)
+        return t.query(stub, args)
+    }
 
 	return nil, errors.New("Received unknown function invocation")
 }
@@ -161,25 +187,7 @@ func (t *SimpleChaincode) Run(stub *shim.ChaincodeStub, function string, args []
 // Query callback representing the query of a chaincode
 func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
     if function == "query" {
-        var A string // Entities
-        var err error
-
-        if len(args) != 1 {
-            return nil, errors.New("Incorrect number of arguments. Expecting name of the person to query")
-        }
-
-        A = args[0]
-
-        // Get the state from the ledger
-        Avalbytes, err := stub.GetState(A)
-        if err != nil {
-            jsonResp := "{\"Error\":\"Failed to get state for " + A + "\"}"
-            return nil, errors.New(jsonResp)
-        }
-
-        jsonResp := "{\"Name\":\"" + A + "\",\"Amount\":\"" + string(Avalbytes) + "\"}"
-        fmt.Printf("Query Response:%s\n", jsonResp)
-        return Avalbytes, nil
+        return t.query(stub, args)
     }
 	else {
 		return nil, errors.New("Invalid query function name. Expecting \"query\"")
